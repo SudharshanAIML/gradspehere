@@ -1,0 +1,4 @@
+.sidebar-container::-webkit-scrollbar {
+    display: none;
+  }
+  

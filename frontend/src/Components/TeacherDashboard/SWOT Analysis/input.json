@@ -1,0 +1,76 @@
+{
+  "students": [
+    {
+      "name": "C Keerthi Kumar",
+      "class": "CS101",
+      "cgpa": 8.23,
+      "leetcode": 1500,
+      "codechef": 1800,
+      "codeforces": 1200
+    },
+    {
+      "name": "Amith Kumar",
+      "class": "CS101",
+      "cgpa": 9.1,
+      "leetcode": 2100,
+      "codechef": 2200,
+      "codeforces": 1800
+    },
+    {
+      "name": "GokulV",
+      "class": "CS101",
+      "cgpa": 7.45,
+      "leetcode": 1120,
+      "codechef": 1250,
+      "codeforces": 900
+    },
+    {
+      "name": "Sudharshan",
+      "class": "CS101",
+      "cgpa": 8.8,
+      "leetcode": 2200,
+      "codechef": 1800,
+      "codeforces": 1800
+    },
+    {
+      "name": "Abishek",
+      "class": "CS101",
+      "cgpa": 6.5,
+      "leetcode": 800,
+      "codechef": 800,
+      "codeforces": 300
+    },
+    {
+      "name": "Kaviya",
+      "class": "CS101",
+      "cgpa": 8.75,
+      "leetcode": 2000,
+      "codechef": 1800,
+      "codeforces": 1300
+    },
+    {
+      "name": "Priya Reka",
+      "class": "CS101",
+      "cgpa": 7.8,
+      "leetcode": 1700,
+      "codechef": 1650,
+      "codeforces": 1000
+    },
+    {
+      "name": "Arun Kumar M",
+      "class": "CS101",
+      "cgpa": 6.9,
+      "leetcode": 900,
+      "codechef": 950,
+      "codeforces": 500
+    },
+    {
+      "name": "Harshiv Krishna M",
+      "class": "CS101",
+      "cgpa": 8.1,
+      "leetcode": 1600,
+      "codechef": 1500,
+      "codeforces": 1400
+    }
+  ]
+}

@@ -5,7 +5,7 @@ import { GraduationCap } from 'lucide-react';
 
 const Landing = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-600">
+    <div className="min-h-screen bg-gray-800">
       <div className="container mx-auto px-4 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -15,7 +15,6 @@ const Landing = () => {
         >
           <motion.div
             animate={{ 
-            //   rotate: [0, 10, -10, 0],
               scale: [1, 1.1, 1]
             }}
             transition={{ 
@@ -34,7 +33,7 @@ const Landing = () => {
           </p>
           <Link
             to="/login"
-            className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold text-lg hover:bg-purple-100 transition-colors"
+            className="bg-white text-gray-800 px-8 py-3 rounded-full font-semibold text-lg hover:bg-purple-100 transition-colors"
           >
             Get Started
           </Link>

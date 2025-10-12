@@ -1,124 +1,250 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const multer = require('multer');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const path = require('path');
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use('/assets/uploads', express.static(path.join(__dirname, 'assets/uploads')));
 
-// MongoDB Connection
-mongoose.connect('mongodb://localhost:27017/profileDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.error(err));
+const uri =
+  "mongodb+srv://harshivkrishnam:jkI95zYgrsUZ7VVl@gradsphere.yv0fo.mongodb.net/?retryWrites=true&w=majority&appName=gradsphere";
+
+mongoose
+  .connect(uri)
+  .then(() => console.log("MongoDB connected successfully"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 // User Schema
 const UserSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-  role: String // 'student' or 'teacher'
-});
-
-const ProfileSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  mobile: String,
-  portfolio: String,
-  linkedin: String,
-  github: String,
-  profileImage: String,
-  jobDetails: [{ company: String, role: String, description: String }],
-  codingProfiles: { leetcode: String, codechef: String, codeforces: String },
-  department: String,
-  year: Number,
-  semester: Number,
-  rollNo: String,
-  section: String
-});
-
-const User = mongoose.model('User', UserSchema);
-const Profile = mongoose.model('Profile', ProfileSchema);
-
-// 🔹 Multer Storage for Image Uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'assets/uploads/');
+  uid: { type: String, unique: true, required: true },
+  email: { type: String, unique: true, required: true },
+  password: { type: String },
+  role: { type: String, required: true }, // 'student' or 'teacher'
+  name: { type: String },
+  mobile: { type: String },
+  portfolio: { type: String },
+  linkedin: { type: String },
+  github: { type: String },
+  profileImage: { type: String },
+  techStacks: [String],
+  jobDetails: [
+    {
+      company: String,
+      role: String,
+      description: String,
+    },
+  ],
+  codingProfiles: {
+    leetcode: String,
+    codechef: String,
+    codeforces: String,
   },
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  }
+  department: { type: String },
+  year: { type: Number },
+  semester: { type: Number },
+  rollNo: { type: String },
+  section: { type: String },
+  certificates: [
+    {
+      name: String,
+      link: String,
+      description: String,
+    },
+  ],
+  achievements: [
+    {
+      description: String,
+    },
+  ],
+  softSkills: [String], // New field for soft skills
+  volunteerWorks: [
+    // New field for volunteer works
+    {
+      organization: String,
+      role: String,
+      description: String,
+    },
+  ],
 });
-const upload = multer({ storage });
+
+const assignmentSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  due_date: { type: Date, required: true },
+  subject: { type: String, required: true },
+});
+
+const Assignment = mongoose.model('Assignment', assignmentSchema);
+const User = mongoose.model("User", UserSchema);
 
 // 🔹 Register User
-app.post('/api/register', async (req, res) => {
+app.post("/api/register", async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { uid, email, name, role, password } = req.body;
+
+    // Check if password is provided
+    if (!password || typeof password !== "string") {
+      return res
+        .status(400)
+        .json({ message: "Password is required and must be a string" });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ uid });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword, role });
+
+    // Create new user
+    const user = new User({ uid, email, name, role, password: hashedPassword });
     await user.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // 🔹 Login User
-app.post('/api/login', async (req, res) => {
+app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!isMatch)
+      return res.status(401).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ email: user.email, role: user.role }, 'secretkey', { expiresIn: '1h' });
+    const token = jwt.sign(
+      { email: user.email, role: user.role },
+      "secretkey",
+      { expiresIn: "1h" }
+    );
     res.json({ token, role: user.role, email: user.email });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// 🔹 Get Profile
-app.get('/api/profile/:email', async (req, res) => {
+// 🔹 Get User Profile
+app.get("/api/profile/:uid", async (req, res) => {
   try {
-    const profile = await Profile.findOne({ email: req.params.email });
-    if (!profile) return res.status(404).json({ message: 'Profile not found' });
-    res.json(profile);
+    const user = await User.findOne({ uid: req.params.uid });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// 🔹 Update Profile
-app.post('/api/profile', upload.single('profileImage'), async (req, res) => {
+
+app.get("/api/profile",async (req,res)=>{
+  try{
+    const allUsers = await User.find({});
+    res.json(allUsers);
+  }
+  catch(error){
+    res.status(404).json({error : error.message});
+  }
+})
+
+
+
+// 🔄 GET: Fetch all assignments
+app.get('/api/assignments', async (req, res) => {
   try {
-    const { name, email, mobile, portfolio, linkedin, github, jobDetails, codingProfiles, department, year, semester, rollNo, section } = req.body;
+    const assignments = await Assignment.find();
+    res.status(200).json(assignments);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to retrieve assignments' });
+  }
+});
 
-    let profile = await Profile.findOne({ email });
-    const profileImage = req.file ? `/assets/uploads/${req.file.filename}` : profile?.profileImage;
+// ➕ POST: Create a new assignment
+app.post('/api/assignments', async (req, res) => {
+  const { title, description, due_date, subject } = req.body;
+  if (!title || !description || !due_date || !subject) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+  try {
+    const newAssignment = new Assignment({ title, description, due_date, subject });
+    await newAssignment.save();
+    res.status(201).json(newAssignment);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create assignment' });
+  }
+});
 
-    if (!profile) {
-      profile = new Profile({
-        name, email, mobile, portfolio, linkedin, github, profileImage,
-        jobDetails: JSON.parse(jobDetails),
-        codingProfiles: JSON.parse(codingProfiles),
-        department, year, semester, rollNo, section
-      });
-    } else {
-      Object.assign(profile, { name, mobile, portfolio, linkedin, github, jobDetails: JSON.parse(jobDetails), codingProfiles: JSON.parse(codingProfiles), profileImage, department, year, semester, rollNo, section });
+// 🔹 Update User Profile
+app.put("/api/profile/:uid", async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const {
+      name,
+      email,
+      mobile,
+      portfolio,
+      linkedin,
+      github,
+      department,
+      year,
+      semester,
+      rollNo,
+      section,
+      jobDetails,
+      codingProfiles,
+      profileImage,
+      certificates,
+      achievements,
+      techStacks,
+      softSkills,
+      volunteerWorks,
+    } = req.body;
+
+    if (!uid || !name || !email) {
+      return res
+        .status(400)
+        .json({ message: "UID, name, and email are required" });
     }
 
-    await profile.save();
-    res.json({ message: 'Profile updated successfully', profile });
+    const user = await User.findOne({ uid });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user fields
+    Object.assign(user, {
+      name,
+      email,
+      mobile,
+      portfolio,
+      linkedin,
+      github,
+      jobDetails: jobDetails || user.jobDetails,
+      codingProfiles: codingProfiles || user.codingProfiles,
+      techStacks: techStacks || user.techStacks,
+      profileImage,
+      department,
+      year,
+      semester,
+      rollNo,
+      section,
+      certificates: certificates || user.certificates,
+      achievements: achievements || user.achievements,
+      softSkills: softSkills || user.softSkills,
+      volunteerWorks: volunteerWorks || user.volunteerWorks,
+    });
+
+    await user.save();
+    res.json({ message: "Profile updated successfully", user });
   } catch (error) {
+    console.error("Error updating profile:", error);
     res.status(500).json({ error: error.message });
   }
 });

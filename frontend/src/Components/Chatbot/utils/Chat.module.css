@@ -1,0 +1,128 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 500px; /* Fixed height for the chat container */
+  width: 500px; /* Fixed width for the chat container */
+  background-color: #1e1e1e; /* Dark background */
+  color: #ffffff; /* White text */
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.chat-header {
+  background-color: #333; /* Dark header */
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: #ff4d4d; /* Red color on hover */
+}
+
+.chat-box {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #2d2d2d; /* Slightly lighter dark background */
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px;
+  border-radius: 10px;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: #007bff; /* Blue for user messages */
+  color: white;
+  border-bottom-right-radius: 0;
+}
+
+.bot-message {
+  align-self: flex-start;
+  background-color: #444; /* Dark gray for bot messages */
+  color: white;
+  border-bottom-left-radius: 0;
+}
+
+.loading-dots {
+  display: inline-block;
+  width: 80px;
+  text-align: left;
+  color: #ccc; /* Light gray for loading text */
+}
+
+.loading-dots::after {
+  content: "...";
+  animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+  0%,
+  20% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  60%,
+  100% {
+    content: "...";
+  }
+}
+
+.input-container {
+  display: flex;
+  padding: 10px;
+  background-color: #333; /* Dark input container */
+  border-top: 1px solid #444; /* Slightly lighter border */
+}
+
+.input-container input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #444;
+  border-radius: 5px;
+  margin-right: 10px;
+  background-color: #2d2d2d; /* Dark input background */
+  color: white; /* White text */
+}
+
+.input-container input::placeholder {
+  color: #888; /* Light gray placeholder */
+}
+
+.input-container button {
+  padding: 10px 20px;
+  background-color: #007bff; /* Blue send button */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.input-container button:disabled {
+  background-color: #555; /* Gray disabled button */
+  cursor: not-allowed;
+}
